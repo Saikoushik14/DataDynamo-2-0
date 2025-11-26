@@ -984,6 +984,19 @@
         padding: 2.3rem 0;
       }
     }
+
+    /* Hide custom cursor on mobile / touch devices */
+@media (pointer: coarse) {
+  body {
+    cursor: auto;              /* show normal behaviour */
+  }
+
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;  /* hide custom cursor */
+  }
+}
+
   </style>
 </head>
 <body>
