@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Data Dynamo 2.0 – 24-Hour National Hackathon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-dark: #050816;
+      --accent: #4f46e5;
+      --accent-soft: rgba(79, 70, 229, 0.25);
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --card-bg: rgba(15, 23, 42, 0.8);
+      --border-soft: rgba(148, 163, 184, 0.3);
+      --danger: #f97373;
+      --success: #22c55e;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 40%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: none; /* hide default cursor */
+    }
+
+    /* Animated background gradient */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -50%;
+      background: conic-gradient(from 180deg at 50% 50%, #4f46e5, #0ea5e9, #22c55e, #f97316, #4f46e5);
+      opacity: 0.18;
+      mix-blend-mode: screen;
+      filter: blur(120px);
+      animation: swirl 24s linear infinite;
+      z-index: -3;
+    }
+
+    @keyframes swirl {
+      0% { transform: rotate(0deg) scale(1.1); }
+      100% { transform: rotate(360deg) scale(1.1); }
+    }
+
+    /* Noise overlay */
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.14;
+      z-index: -2;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='noStitch' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5' /%3E%3C/svg%3E");
+    }
+
+    /* Custom cursor */
+    .cursor-dot {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      mix-blend-mode: difference;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+
+    .cursor-ring {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      box-shadow: 0 0 20px rgba(129, 140, 248, 0.6);
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition:
+        width 0.15s ease,
+        height 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease,
+        opacity 0.15s ease;
+    }
+
+    .cursor-ring.cursor-hover {
+      width: 40px;
+      height: 40px;
+      border-color: rgba(129, 140, 248, 1);
+      box-shadow: 0 0 30px rgba(129, 140, 248, 0.9);
+      background: radial-gradient(circle at center, rgba(79, 70, 229, 0.3), transparent);
+    }
+
+    .cursor-ring.cursor-down {
+      width: 32px;
+      height: 32px;
+      opacity: 0.8;
+    }
+
+    /* Navbar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(to bottom, rgba(2, 6, 23, 0.92), rgba(15, 23, 42, 0.55), transparent);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .nav {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .logo-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #a5b4fc, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      box-shadow: 0 0 20px rgba(79, 70, 229, 0.6);
+    }
+
+    .site-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .site-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      font-size: 0.85rem;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      position: relative;
+      padding-bottom: 4px;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(to right, #4f46e5, #0ea5e9);
+      transition: width 0.2s ease;
+      border-radius: 999px;
+    }
+
+    .nav-links a:hover {
+      color: #e5e7eb;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .primary-btn {
+      border-radius: 999px;
+      padding: 0.45rem 1.1rem;
+      border: 1px solid rgba(129, 140, 248, 0.7);
+      background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.25), rgba(15, 23, 42, 0.9));
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      position: relative;
+      overflow: hidden;
+      transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease;
+    }
+
+    .primary-btn span.arrow {
+      font-size: 1rem;
+      transition: transform 0.18s ease;
+    }
+
+    .primary-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(244, 63, 94, 0.5), rgba(59, 130, 246, 0.5), rgba(16, 185, 129, 0.5));
+      opacity: 0;
+      transition: opacity 0.18s ease;
+      mix-blend-mode: screen;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.9);
+      border-color: rgba(191, 219, 254, 0.9);
+    }
+
+    .primary-btn:hover::before {
+      opacity: 1;
+    }
+
+    .primary-btn:hover .arrow {
+      transform: translateX(4px);
+    }
+
+    /* Layout helpers */
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 4rem 1.25rem;
+    }
+
+    section {
+      padding: 3rem 0;
+    }
+
+    .section-header {
+      text-align: left;
+      margin-bottom: 1.75rem;
+    }
+
+    .section-eyebrow {
+      font-size: 0.8rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #a5b4fc;
+      margin-bottom: 0.4rem;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      max-width: 34rem;
+    }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr);
+      gap: 2rem;
+      align-items: center;
+      padding-top: 2rem;
+    }
+
+    .hero-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .hero-pill {
+      border-radius: 999px;
+      padding: 0.28rem 0.7rem;
+      font-size: 0.7rem;
+      border: 1px solid rgba(129, 140, 248, 0.7);
+      background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.25), rgba(15, 23, 42, 0.95));
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .hero-pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at center, #22c55e, #16a34a);
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3);
+    }
+
+    .hero-title {
+      font-size: clamp(2.1rem, 4vw, 2.9rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 0.65rem;
+    }
+
+    .hero-title span.highlight {
+      background: linear-gradient(to right, #a855f7, #4f46e5, #0ea5e9);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 1.3rem;
+      max-width: 32rem;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+      font-size: 0.8rem;
+    }
+
+    .meta-pill {
+      border-radius: 999px;
+      padding: 0.3rem 0.75rem;
+      border: 1px solid rgba(75, 85, 99, 0.7);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.7));
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--text-muted);
+    }
+
+    .meta-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: radial-gradient(circle, #facc15, #f97316);
+    }
+
+    .meta-label {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1.4rem;
+    }
+
+    .secondary-link {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      text-decoration: none;
+    }
+
+    .secondary-link span.icon {
+      font-size: 1rem;
+      transition: transform 0.18s ease;
+    }
+
+    .secondary-link:hover span.icon {
+      transform: translateX(4px) translateY(-1px);
+    }
+
+    .hero-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .hero-footer strong {
+      color: #e5e7eb;
+    }
+
+    /* Countdown & stats */
+    .hero-right {
+      position: relative;
+    }
+
+    .glass-panel {
+      position: relative;
+      border-radius: 1.3rem;
+      padding: 1.3rem;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.7));
+      border: 1px solid var(--border-soft);
+      box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(148, 163, 184, 0.3);
+      overflow: hidden;
+    }
+
+    .glass-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.22), transparent 58%);
+      opacity: 1;
+      pointer-events: none;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.9rem;
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .panel-chip {
+      font-size: 0.7rem;
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem;
+      border: 1px solid rgba(74, 222, 128, 0.75);
+      background: radial-gradient(circle at top, rgba(34, 197, 94, 0.25), transparent);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .dot-live {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.33);
+    }
+
+    /* Time bar */
+    .timebar {
+      margin-bottom: 0.9rem;
+    }
+
+    .timebar-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .timebar-label {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timebar-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      overflow: hidden;
+    }
+
+    .timebar-fill {
+      height: 100%;
+      width: 100%;
+      border-radius: 999px;
+      background: linear-gradient(to right, #22c55e, #a3e635, #facc15, #f97316);
+      transform-origin: left center;
+      transition: width 0.4s ease-out;
+    }
+
+    .countdown {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-bottom: 1.3rem;
+    }
+
+    .time-box {
+      border-radius: 0.9rem;
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.9));
+      padding: 0.6rem 0.4rem;
+      text-align: center;
+    }
+
+    .time-number {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.1rem;
+    }
+
+    .time-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .timeline-mini {
+      border-radius: 0.9rem;
+      border: 1px dashed rgba(75, 85, 99, 0.9);
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.96));
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      display: grid;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .timeline-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .timeline-label {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .timeline-meta {
+      color: var(--text-muted);
+    }
+
+    .panel-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      gap: 0.75rem;
+    }
+
+    .pill-tag {
+      border-radius: 999px;
+      padding: 0.26rem 0.7rem;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pill-tag span.icon {
+      font-size: 0.85rem;
+    }
+
+    .shine {
+      position: absolute;
+      inset: -40%;
+      background: conic-gradient(from 130deg at 10% 0, rgba(248, 250, 252, 0.5), transparent 50%);
+      opacity: 0.45;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      transform: translate3d(0, 0, 0);
+      animation: spin-shine 16s linear infinite;
+    }
+
+    @keyframes spin-shine {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .panel-orbit {
+      position: absolute;
+      inset: -5%;
+      border-radius: 1.5rem;
+      border: 1px dashed rgba(129, 140, 248, 0.35);
+      pointer-events: none;
+    }
+
+    /* Stats section */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+
+    .stat-card {
+      position: relative;
+      border-radius: 1.1rem;
+      padding: 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at top, rgba(129, 140, 248, 0.22), transparent 60%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 0.1rem;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.7rem;
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      color: #e5e7eb;
+    }
+
+    .stat-pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    /* Cards grid (used for domains) */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+
+    .track-card {
+      position: relative;
+      border-radius: 1.1rem;
+      padding: 1rem;
+      background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.2), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.95);
+      overflow: hidden;
+      transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease,
+        border-color 0.22s ease,
+        background 0.22s ease;
+      cursor: pointer;
+    }
+
+    .track-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 26px 60px rgba(15, 23, 42, 0.95);
+      border-color: rgba(191, 219, 254, 0.9);
+      background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.3), rgba(15, 23, 42, 0.98));
+    }
+
+    .track-tag {
+      font-size: 0.7rem;
+      border-radius: 999px;
+      padding: 0.22rem 0.6rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-bottom: 0.55rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.9);
+    }
+
+    .track-title {
+      font-size: 0.98rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .track-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .track-footer {
+      font-size: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #e5e7eb;
+    }
+
+    .track-footer span.muted {
+      color: var(--text-muted);
+    }
+
+    /* Timeline / prizes */
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.1fr);
+      gap: 1.5rem;
+    }
+
+    .timeline-list {
+      border-radius: 1.1rem;
+      border: 1px solid var(--border-soft);
+      background: var(--card-bg);
+      padding: 1rem;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.95);
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.9rem;
+      padding: 0.7rem 0;
+      border-bottom: 1px dashed rgba(51, 65, 85, 0.8);
+    }
+
+    .timeline-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .timeline-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      min-width: 4.6rem;
+    }
+
+    .timeline-content-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.1rem;
+    }
+
+    .timeline-content-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .prizes-card {
+      border-radius: 1.1rem;
+      border: 1px solid rgba(248, 250, 252, 0.2);
+      background: radial-gradient(circle at top right, rgba(248, 250, 252, 0.05), rgba(15, 23, 42, 0.98));
+      padding: 1rem;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.95);
+    }
+
+    .prize-badge {
+      font-size: 0.75rem;
+      border-radius: 999px;
+      padding: 0.24rem 0.7rem;
+      border: 1px solid rgba(252, 211, 77, 0.8);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: radial-gradient(circle at top, rgba(252, 211, 77, 0.15), transparent);
+      margin-bottom: 0.6rem;
+    }
+
+    .prize-total {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .prize-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.7rem;
+    }
+
+    .prize-list {
+      display: grid;
+      gap: 0.55rem;
+      font-size: 0.8rem;
+    }
+
+    .prize-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.35rem 0.45rem;
+      border-radius: 0.6rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    .prize-rank {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .rank-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #facc15;
+    }
+
+    .prize-amount {
+      font-weight: 500;
+    }
+
+    /* FAQ */
+    .faq-list {
+      border-radius: 1.1rem;
+      border: 1px solid var(--border-soft);
+      background: var(--card-bg);
+      padding: 1rem;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.95);
+    }
+
+    .faq-item {
+      border-bottom: 1px solid rgba(30, 41, 59, 0.9);
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-question {
+      padding: 0.7rem 0.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .faq-toggle {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.22s ease;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding-right: 0.3rem;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 160px;
+      padding-bottom: 0.6rem;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(30, 41, 59, 0.9);
+      padding: 1.4rem 0 2.5rem 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .footer-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .footer-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      max-width: 520px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+    }
+
+    .footer-links a:hover {
+      color: #e5e7eb;
+    }
+
+    /* Scroll reveal animation */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+    }
+
+    .reveal.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .hero-right {
+        order: -1;
+      }
+      .countdown {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .two-col {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .cards-grid,
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .nav-links {
+        display: none;
+      }
+      .hero {
+        padding-top: 1.2rem;
+      }
+      .cards-grid,
+      .stats-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .countdown {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      section {
+        padding: 2.3rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Custom cursor elements -->
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
+
+  <div class="noise"></div>
+
+  <!-- NAVBAR -->
+  <header>
+    <div class="nav">
+      <div class="nav-left">
+        <div class="logo-circle">DD</div>
+        <div>
+          <div class="site-title">Data Dynamo 2.0</div>
+          <div class="site-sub">24-Hour National Hackathon · Anurag University</div>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="#about">About</a>
+        <a href="#tracks">Domains</a>
+        <a href="#schedule">Schedule</a>
+        <a href="#faq">FAQ</a>
+        <button class="primary-btn" onclick="document.getElementById('register').scrollIntoView({behavior:'smooth'})">
+          Register Now
+          <span class="arrow">↗</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="hero" class="hero">
+      <div class="hero-left reveal">
+        <div class="hero-badge-row">
+          <div class="hero-pill">
+            <span class="hero-pill-dot"></span>
+            Registrations Open • Limited Slots
+          </div>
+          <div class="hero-pill">
+            24-Hour Offline Hackathon
+          </div>
+        </div>
+
+        <h1 class="hero-title">
+          Build, innovate & deploy at
+          <span class="highlight">Data Dynamo&nbsp;2.0</span>.
+        </h1>
+
+        <p class="hero-subtitle">
+          A 24-hour national-level hackathon hosted by the Department of Data Science, Anurag University.
+          Collaborate with developers, designers, and innovators to ship working solutions overnight.
+        </p>
+
+        <div class="hero-meta">
+          <div class="meta-pill">
+            <span class="meta-dot"></span>
+            <span class="meta-label">Date:</span> 30–31 January 2026
+          </div>
+          <div class="meta-pill">
+            <span class="meta-label">Venue:</span> Anurag University, Hyderabad
+          </div>
+          <div class="meta-pill">
+            <span class="meta-label">Team Size:</span> 1–4 members · ₹600 / student
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button class="primary-btn" onclick="document.getElementById('register').scrollIntoView({behavior:'smooth'})">
+            Apply as a Team
+            <span class="arrow">🚀</span>
+          </button>
+          <a href="#tracks" class="secondary-link">
+            Explore domains
+            <span class="icon">➜</span>
+          </a>
+        </div>
+
+        <div class="hero-footer">
+          <div>
+            <strong>Organized by:</strong> Department of Data Science, Anurag University
+          </div>
+          <div>
+            <strong>In collaboration with:</strong> IEEE CIS Chapter, Datum Club, Data Analytics Club
+          </div>
+          <div>
+            <strong>Community collaborators:</strong> Indian Data Club
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-right reveal">
+        <div class="glass-panel">
+          <div class="shine"></div>
+          <div class="panel-orbit"></div>
+
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Countdown to hackathon</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">
+                Hyderabad · IST (UTC+5:30)
+              </div>
+            </div>
+            <div class="panel-chip">
+              <span class="dot-live"></span>
+              Live timer
+            </div>
+          </div>
+
+          <!-- TIME BAR -->
+          <div class="timebar">
+            <div class="timebar-head">
+              <span>Time remaining to start the hackathon</span>
+              <span class="timebar-label" id="timebar-label">--</span>
+            </div>
+            <div class="timebar-track">
+              <div class="timebar-fill" id="timebar-fill"></div>
+            </div>
+          </div>
+
+          <!-- BOXED COUNTDOWN -->
+          <div class="countdown" id="countdown">
+            <div class="time-box">
+              <div class="time-number" data-unit="days">00</div>
+              <div class="time-label">Days</div>
+            </div>
+            <div class="time-box">
+              <div class="time-number" data-unit="hours">00</div>
+              <div class="time-label">Hours</div>
+            </div>
+            <div class="time-box">
+              <div class="time-number" data-unit="minutes">00</div>
+              <div class="time-label">Minutes</div>
+            </div>
+            <div class="time-box">
+              <div class="time-number" data-unit="seconds">00</div>
+              <div class="time-label">Seconds</div>
+            </div>
+          </div>
+
+          <div class="timeline-mini">
+            <div class="timeline-row">
+              <div>
+                <div class="timeline-label">Check-in & Briefing</div>
+                <div class="timeline-meta">30 Jan · 9:00 AM</div>
+              </div>
+              <div>🪪 Verification</div>
+            </div>
+            <div class="timeline-row">
+              <div>
+                <div class="timeline-label">Hack Hours</div>
+                <div class="timeline-meta">30 Jan · 11:00 AM – 31 Jan · 11:00 AM</div>
+              </div>
+              <div>💻 Build & iterate</div>
+            </div>
+            <div class="timeline-row">
+              <div>
+                <div class="timeline-label">Demos & Prizes</div>
+                <div class="timeline-meta">31 Jan · 2:00 PM onwards</div>
+              </div>
+              <div>🏆 Jury panel</div>
+            </div>
+          </div>
+
+          <div class="panel-footer">
+            <div class="pill-tag">
+              <span class="icon">👥</span>
+              Team size: 1–4 members
+            </div>
+            <div>
+              Registration fee: ₹600 per student · Prize pool ₹1,00,000
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section id="about" class="reveal">
+      <div class="section-header">
+        <div class="section-eyebrow">Why join Data Dynamo 2.0?</div>
+        <h2 class="section-title">Code, collaborate, and create impact.</h2>
+        <p class="section-subtitle">
+          Data Dynamo 2.0 brings together developers, designers, hardware enthusiasts, and data scientists
+          to build end-to-end solutions across multiple domains in just 24 hours.
+        </p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" data-count="400">0</div>
+          <div class="stat-label">+ participants expected</div>
+          <div class="stat-pill">
+            <span class="stat-pill-dot"></span>
+            From diverse colleges & domains
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" data-count="7">0</div>
+          <div class="stat-label">hackathon domains</div>
+          <div class="stat-pill">
+            <span class="stat-pill-dot"></span>
+            Software, hardware & AI tracks
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" data-count="100000">0</div>
+          <div class="stat-label">total prize pool (INR)</div>
+          <div class="stat-pill">
+            <span class="stat-pill-dot"></span>
+            Cash prizes, goodies & recognition
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOMAINS -->
+    <section id="tracks" class="reveal">
+      <div class="section-header">
+        <div class="section-eyebrow">Domains</div>
+        <h2 class="section-title">Choose your problem space.</h2>
+        <p class="section-subtitle">
+          Teams can pick any one of the following domains and build a solution that showcases their creativity,
+          technical depth, and real-world impact.
+        </p>
+      </div>
+
+      <div class="cards-grid">
+        <div class="track-card">
+          <div class="track-tag">
+            <span>🌐</span> Web / Mobile Development
+          </div>
+          <div class="track-title">Full-stack & mobile experiences</div>
+          <div class="track-desc">
+            Build responsive web apps, PWAs, or mobile applications that solve real user problems with clean UI/UX
+            and scalable backends.
+          </div>
+          <div class="track-footer">
+            <span class="muted">Ideal for: Web, Android, iOS</span>
+            <span>Frontend · Backend</span>
+          </div>
+        </div>
+
+        <div class="track-card">
+          <div class="track-tag">
+            <span>📡</span> Internet of Things (IoT)
+          </div>
+          <div class="track-title">Smart, connected systems</div>
+          <div class="track-desc">
+            Use sensors, microcontrollers, and cloud platforms to create IoT solutions for automation,
+            monitoring, or smart infrastructure.
+          </div>
+          <div class="track-footer">
+            <span class="muted">Ideal for: Hardware, Embedded</span>
+            <span>Edge · Cloud</span>
+          </div>
+        </div>
+
+        <div class="track-card">
+          <div class="track-tag">
+            <span>🕶️</span> AR / VR & Metaverse
+          </div>
+          <div class="track-title">Immersive digital worlds</div>
+          <div class="track-desc">
+            Design AR/VR experiences, simulations, or metaverse environments that enhance learning,
+            gaming, or collaboration.
+          </div>
+          <div class="track-footer">
+            <span class="muted">Ideal for: Unity, Unreal, XR</span>
+            <span>Immersion · UX</span>
+          </div>
+        </div>
+
+        <div class="track-card">
+          <div class="track-tag">
+            <span>🛡️</span> Cybersecurity / Blockchain
+          </div>
+          <div class="track-title">Secure & trusted systems</div>
+          <div class="track-desc">
+            Work on security tools, threat detection, secure authentication, or blockchain-based
+            transparency and trust solutions.
+          </div>
+          <div class="track-footer">
+            <span class="muted">Ideal for: Security, Web3</span>
+            <span>Security · Trust</span>
+          </div>
+        </div>
+
+        <div class="track-card">
+          <div class="track-tag">
+            <span>📊</span> Data Analytics
+          </div>
+          <div class="track-title">Insights from data</div>
+          <div class="track-desc">
+            Use dashboards, visualizations, and analytics pipelines to uncover patterns and support
+            data-driven decision making.
+          </div>
+          <div class="track-footer">
+            <span class="muted">Ideal for: BI, Analytics</span>
+            <span>Dashboards · ETL</span>
+          </div>
+        </div>
+
+        <div class="track-card">
+          <div class="track-tag">
+            <span>🤖</span> AI / ML / GenAI / LLMs
+          </div>
+          <div class="track-title">Intelligent systems & copilots</div>
+          <div class="track-desc">
+            Build ML models, GenAI apps, or LLM-based assistants tailored for education, BFSI, health,
+            productivity, and more.
+          </div>
+          <div class="track-footer">
+            <span class="muted">Ideal for: ML, GenAI</span>
+            <span>Models · Agents</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCHEDULE + PRIZES -->
+    <section id="schedule" class="reveal">
+      <div class="two-col">
+        <div>
+          <div class="section-header">
+            <div class="section-eyebrow">Schedule</div>
+            <h2 class="section-title">A focused 24-hour sprint.</h2>
+            <p class="section-subtitle">
+              Expect immersive build time, mentor check-ins, and enough energy to keep you shipping all night.
+            </p>
+          </div>
+
+          <div class="timeline-list">
+            <div class="timeline-item">
+              <div class="timeline-time">09:00</div>
+              <div>
+                <div class="timeline-content-title">Check-in & verification</div>
+                <div class="timeline-content-sub">Team registration, ID verification, and workspace allocation.</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-time">10:00</div>
+              <div>
+                <div class="timeline-content-title">Inauguration & briefing</div>
+                <div class="timeline-content-sub">Opening ceremony, rules, judging criteria, and domain clarifications.</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-time">11:00</div>
+              <div>
+                <div class="timeline-content-title">Hack starts</div>
+                <div class="timeline-content-sub">24 hours of coding, building, testing, and refining your solutions.</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-time">23:00</div>
+              <div>
+                <div class="timeline-content-title">Code freeze</div>
+                <div class="timeline-content-sub">Submissions close; teams prepare demos and presentations.</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-time">Next day</div>
+              <div>
+                <div class="timeline-content-title">Demos, jury & valedictory</div>
+                <div class="timeline-content-sub">Top teams pitch to the jury, followed by prize distribution.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-header" style="margin-bottom: 1rem;">
+            <div class="section-eyebrow">Prize Pool</div>
+            <h2 class="section-title">₹1,00,000 in prizes & recognition.</h2>
+          </div>
+
+          <div class="prizes-card">
+            <div class="prize-badge">
+              <span>🏆</span>
+              Cash, goodies & certificates
+            </div>
+            <div class="prize-total">Prize Pool: ₹1,00,000</div>
+            <div class="prize-note">
+              Along with cash prizes and goodies, winning and standout teams gain recognition from the Department of Data Science,
+              IEEE CIS Chapter, Datum Club, Data Analytics Club, and Indian Data Club.
+            </div>
+
+            <div class="prize-list">
+              <div class="prize-row">
+                <div class="prize-rank">
+                  <span class="rank-dot"></span>
+                  <span>Overall Winners</span>
+                </div>
+                <div class="prize-amount">Top 3 teams</div>
+              </div>
+              <div class="prize-row">
+                <div class="prize-rank">
+                  <span class="rank-dot" style="background:#22c55e;"></span>
+                  <span>Best Domain-wise Projects</span>
+                </div>
+                <div class="prize-amount">Domain excellence awards</div>
+              </div>
+              <div class="prize-row">
+                <div class="prize-rank">
+                  <span class="rank-dot" style="background:#38bdf8;"></span>
+                  <span>Special Recognitions</span>
+                </div>
+                <div class="prize-amount">Innovation & impact</div>
+              </div>
+              <div class="prize-row">
+                <div class="prize-rank">
+                  <span class="rank-dot" style="background:#a855f7;"></span>
+                  <span>Goodies & Swag</span>
+                </div>
+                <div class="prize-amount">For standout teams & contributors</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ + REGISTER -->
+    <section id="faq" class="reveal">
+      <div class="two-col">
+        <div>
+          <div class="section-header">
+            <div class="section-eyebrow">FAQ</div>
+            <h2 class="section-title">Good to know before you apply.</h2>
+          </div>
+
+          <div class="faq-list" id="faq-list">
+            <div class="faq-item">
+              <div class="faq-question">
+                <span>Who can participate?</span>
+                <div class="faq-toggle">+</div>
+              </div>
+              <div class="faq-answer">
+                Data Dynamo 2.0 is open to students from any department and college. Whether you are into coding,
+                design, hardware, or data, you’re welcome to participate.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question">
+                <span>What is the team size and fee?</span>
+                <div class="faq-toggle">+</div>
+              </div>
+              <div class="faq-answer">
+                Team size is 1–4 members. The registration fee is ₹600 per student, payable during registration
+                as per the instructions provided on the form.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question">
+                <span>Do we need to bring our own laptops?</span>
+                <div class="faq-toggle">+</div>
+              </div>
+              <div class="faq-answer">
+                Yes, teams must bring their own laptops, chargers, and necessary hardware components (if applicable).
+                Internet and power arrangements will be available at the venue.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question">
+                <span>Will food & overnight stay be arranged?</span>
+                <div class="faq-toggle">+</div>
+              </div>
+              <div class="faq-answer">
+                Basic overnight arrangements along with refreshments and meals will be provided to participants for
+                the duration of the hackathon.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question">
+                <span>How will teams be judged?</span>
+                <div class="faq-toggle">+</div>
+              </div>
+              <div class="faq-answer">
+                Projects will be evaluated based on problem understanding, innovation, technical implementation,
+                impact, and quality of the final demo and presentation.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="register">
+          <div class="section-header">
+            <div class="section-eyebrow">Registration</div>
+            <h2 class="section-title">Register your team for Data Dynamo 2.0.</h2>
+            <p class="section-subtitle">
+              Use the official registration form linked below to submit your team details.
+            </p>
+          </div>
+
+          <div class="prizes-card">
+            <p style="font-size:0.85rem; margin-bottom:0.8rem;">
+              Click the button below to open the official registration form. Ensure that team name, member details,
+              and contact numbers are entered correctly. The registration fee is ₹600 per student.
+            </p>
+            <button
+              class="primary-btn"
+              style="width:100%; justify-content:center;"
+              onclick="window.open('https://forms.gle/jmQy37MxzVzES8AG8', '_blank')"
+            >
+              Open Registration Form
+              <span class="arrow">↗</span>
+            </button>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.7rem;">
+              You will receive an acknowledgement once your response is recorded. For any corrections or
+              team changes after registration, please reach out to the coordinators listed below.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT COORDINATORS -->
+    <section id="contact" class="reveal">
+      <div class="section-header">
+        <div class="section-eyebrow">Contact</div>
+        <h2 class="section-title">Coordinators & Program Chair.</h2>
+        <p class="section-subtitle">
+          For queries related to registration, domains, logistics, or any other details, feel free to reach out
+          to the student or faculty coordinators.
+        </p>
+      </div>
+
+      <div class="two-col">
+        <div class="faq-list">
+          <div style="font-size:0.9rem; font-weight:500; margin-bottom:0.4rem;">Student Coordinators</div>
+          <p style="font-size:0.85rem; margin-bottom:0.3rem;">
+            <strong>Hassan Ahmed</strong><br/>
+            📞 9959167096
+          </p>
+          <p style="font-size:0.85rem; margin-bottom:0.3rem;">
+            <strong>Harshith</strong><br/>
+            📞 8125579667
+          </p>
+          <p style="font-size:0.85rem;">
+            <strong>G. Gourav Kumar</strong><br/>
+            📞 9676473925
+          </p>
+        </div>
+
+        <div class="faq-list">
+          <div style="font-size:0.9rem; font-weight:500; margin-bottom:0.4rem;">Faculty Coordinators & Program Chair</div>
+          <p style="font-size:0.85rem; margin-bottom:0.3rem;">
+            <strong>Faculty Coordinators</strong><br/>
+            Ms. B. Jyothi<br/>
+            Mr. Salar Mohammad<br/>
+            Dr. V. Biksham
+          </p>
+          <p style="font-size:0.85rem;">
+            <strong>Program Chair</strong><br/>
+            Dr. M. Sridevi<br/>
+            Head, Department of Data Science<br/>
+            Anurag University
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-text">
+        <div>
+          <strong>Note:</strong> To make any changes to your team after registration, please contact the coordinators.
+        </div>
+        <div>
+          © 2026 Data Dynamo 2.0 - Anurag University | Department of Data Science
+        </div>
+        <div>
+          Organized by Department of Data Science in collaboration with IEEE CIS Chapter, Datum Club, and Data Analytics Club.
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="#hero">Back to top ↑</a>
+        <a href="#tracks">Domains</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scroll for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        const targetId = link.getAttribute('href').substring(1);
+        const target = document.getElementById(targetId);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('show');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    revealEls.forEach(el => revealObserver.observe(el));
+
+    // Stat counters
+    const counterEls = document.querySelectorAll('[data-count]');
+    let countersStarted = false;
+
+    function startCounters() {
+      if (countersStarted) return;
+      countersStarted = true;
+
+      counterEls.forEach(el => {
+        const target = parseInt(el.getAttribute('data-count'), 10);
+        let current = 0;
+        const isMoney = target > 5000;
+
+        const step = () => {
+          const increment = Math.max(1, Math.floor(target / 80));
+          current += increment;
+          if (current >= target) {
+            current = target;
+          }
+
+          if (isMoney) {
+            el.textContent = '₹' + current.toLocaleString('en-IN');
+          } else {
+            el.textContent = current.toLocaleString('en-IN') + '+';
+          }
+
+          if (current < target) {
+            requestAnimationFrame(step);
+          }
+        };
+        requestAnimationFrame(step);
+      });
+    }
+
+    const statsSection = document.getElementById('about');
+    const statsObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          startCounters();
+          statsObserver.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+
+    if (statsSection) statsObserver.observe(statsSection);
+
+    // FAQ accordion
+    document.querySelectorAll('#faq-list .faq-item').forEach(item => {
+      const question = item.querySelector('.faq-question');
+      question.addEventListener('click', () => {
+        const open = item.classList.contains('open');
+        document.querySelectorAll('#faq-list .faq-item').forEach(i => i.classList.remove('open'));
+        if (!open) item.classList.add('open');
+      });
+    });
+
+    // Countdown timer (event start date)
+    const eventDate = new Date('2026-01-30T09:00:00+05:30').getTime();
+    const cdContainer = document.getElementById('countdown');
+    const timebarFill = document.getElementById('timebar-fill');
+    const timebarLabel = document.getElementById('timebar-label');
+    const initialDiff = Math.max(eventDate - Date.now(), 1); // for time bar reference
+
+    function updateCountdown() {
+      const now = Date.now();
+      const diff = eventDate - now;
+
+      const units = {
+        days: cdContainer.querySelector('[data-unit="days"]'),
+        hours: cdContainer.querySelector('[data-unit="hours"]'),
+        minutes: cdContainer.querySelector('[data-unit="minutes"]'),
+        seconds: cdContainer.querySelector('[data-unit="seconds"]')
+      };
+
+      if (diff <= 0) {
+        units.days.textContent = '00';
+        units.hours.textContent = '00';
+        units.minutes.textContent = '00';
+        units.seconds.textContent = '00';
+
+        if (timebarFill) timebarFill.style.width = '0%';
+        if (timebarLabel) timebarLabel.textContent = 'Hackathon started';
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      units.days.textContent = String(days).padStart(2, '0');
+      units.hours.textContent = String(hours).padStart(2, '0');
+      units.minutes.textContent = String(minutes).padStart(2, '0');
+      units.seconds.textContent = String(seconds).padStart(2, '0');
+
+      if (timebarLabel) {
+        timebarLabel.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      }
+
+      if (timebarFill) {
+        const remainingRatio = diff / initialDiff;
+        const widthPercent = Math.max(0, Math.min(100, remainingRatio * 100));
+        timebarFill.style.width = widthPercent + '%';
+      }
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // Custom cursor logic
+    const cursorDot = document.querySelector('.cursor-dot');
+    const cursorRing = document.querySelector('.cursor-ring');
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let ringX = mouseX;
+    let ringY = mouseY;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.left = mouseX + 'px';
+      cursorDot.style.top = mouseY + 'px';
+    });
+
+    function animateRing() {
+      const speed = 0.16; // lower = more lag
+      ringX += (mouseX - ringX) * speed;
+      ringY += (mouseY - ringY) * speed;
+      cursorRing.style.left = ringX + 'px';
+      cursorRing.style.top = ringY + 'px';
+      requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    const hoverTargets = document.querySelectorAll(
+      'a, button, .track-card, .primary-btn, .secondary-link'
+    );
+
+    hoverTargets.forEach((el) => {
+      el.addEventListener('mouseenter', () => {
+        cursorRing.classList.add('cursor-hover');
+      });
+      el.addEventListener('mouseleave', () => {
+        cursorRing.classList.remove('cursor-hover');
+      });
+    });
+
+    window.addEventListener('mousedown', () => {
+      cursorRing.classList.add('cursor-down');
+    });
+    window.addEventListener('mouseup', () => {
+      cursorRing.classList.remove('cursor-down');
+    });
+  </script>
+</body>
+</html>
