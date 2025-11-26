@@ -34,7 +34,7 @@
       color: var(--text-main);
       min-height: 100vh;
       overflow-x: hidden;
-      cursor: none; /* hide default cursor */
+      cursor: none; /* hide default cursor on desktop */
     }
 
     /* Animated background gradient */
@@ -946,6 +946,17 @@
       transform: translateY(0);
     }
 
+    /* Hide custom cursor on mobile / touch devices */
+    @media (pointer: coarse) {
+      body {
+        cursor: auto;
+      }
+      .cursor-dot,
+      .cursor-ring {
+        display: none !important;
+      }
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .hero {
@@ -984,19 +995,6 @@
         padding: 2.3rem 0;
       }
     }
-
-    /* Hide custom cursor on mobile / touch devices */
-@media (pointer: coarse) {
-  body {
-    cursor: auto;              /* show normal behaviour */
-  }
-
-  .cursor-dot,
-  .cursor-ring {
-    display: none !important;  /* hide custom cursor */
-  }
-}
-
   </style>
 </head>
 <body>
@@ -1723,51 +1721,68 @@
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // Custom cursor logic
-    const cursorDot = document.querySelector('.cursor-dot');
-    const cursorRing = document.querySelector('.cursor-ring');
+    // Custom cursor logic (desktop only)
+    (function () {
+      const cursorDot = document.querySelector('.cursor-dot');
+      const cursorRing = document.querySelector('.cursor-ring');
 
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let ringX = mouseX;
-    let ringY = mouseY;
+      if (!cursorDot || !cursorRing) return;
 
-    window.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      cursorDot.style.left = mouseX + 'px';
-      cursorDot.style.top = mouseY + 'px';
-    });
+      const isCoarsePointer =
+        (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
+        'ontouchstart' in window;
 
-    function animateRing() {
-      const speed = 0.16; // lower = more lag
-      ringX += (mouseX - ringX) * speed;
-      ringY += (mouseY - ringY) * speed;
-      cursorRing.style.left = ringX + 'px';
-      cursorRing.style.top = ringY + 'px';
-      requestAnimationFrame(animateRing);
-    }
-    animateRing();
+      // On touch / mobile devices: disable custom cursor logic
+      if (isCoarsePointer) {
+        cursorDot.style.display = 'none';
+        cursorRing.style.display = 'none';
+        document.body.style.cursor = 'auto';
+        return;
+      }
 
-    const hoverTargets = document.querySelectorAll(
-      'a, button, .track-card, .primary-btn, .secondary-link'
-    );
+      // Desktop cursor behaviour
+      let mouseX = window.innerWidth / 2;
+      let mouseY = window.innerHeight / 2;
+      let ringX = mouseX;
+      let ringY = mouseY;
 
-    hoverTargets.forEach((el) => {
-      el.addEventListener('mouseenter', () => {
-        cursorRing.classList.add('cursor-hover');
+      window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        cursorDot.style.left = mouseX + 'px';
+        cursorDot.style.top = mouseY + 'px';
       });
-      el.addEventListener('mouseleave', () => {
-        cursorRing.classList.remove('cursor-hover');
-      });
-    });
 
-    window.addEventListener('mousedown', () => {
-      cursorRing.classList.add('cursor-down');
-    });
-    window.addEventListener('mouseup', () => {
-      cursorRing.classList.remove('cursor-down');
-    });
+      function animateRing() {
+        const speed = 0.16;
+        ringX += (mouseX - ringX) * speed;
+        ringY += (mouseY - ringY) * speed;
+        cursorRing.style.left = ringX + 'px';
+        cursorRing.style.top = ringY + 'px';
+        requestAnimationFrame(animateRing);
+      }
+      animateRing();
+
+      const hoverTargets = document.querySelectorAll(
+        'a, button, .track-card, .primary-btn, .secondary-link'
+      );
+
+      hoverTargets.forEach((el) => {
+        el.addEventListener('mouseenter', () => {
+          cursorRing.classList.add('cursor-hover');
+        });
+        el.addEventListener('mouseleave', () => {
+          cursorRing.classList.remove('cursor-hover');
+        });
+      });
+
+      window.addEventListener('mousedown', () => {
+        cursorRing.classList.add('cursor-down');
+      });
+      window.addEventListener('mouseup', () => {
+        cursorRing.classList.remove('cursor-down');
+      });
+    })();
   </script>
 </body>
 </html>
